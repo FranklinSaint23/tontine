@@ -1,0 +1,57 @@
+services:
+  # ── Backend FastAPI ──────────────────────────────────────────────────────────
+  - type: web
+    name: tontine-backend
+    runtime: python
+    rootDir: backend
+    buildCommand: pip install -r requirements.txt
+    startCommand: bash start.sh
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: tontine-db
+          property: connectionString
+      - key: SECRET_KEY
+        generateValue: true
+      - key: ACCESS_TOKEN_EXPIRE_MINUTES
+        value: "1440"
+      - key: GROQ_API_KEY
+        sync: false
+      - key: EMAIL_FROM
+        sync: false
+      - key: SMTP_HOST
+        value: smtp.gmail.com
+      - key: SMTP_PORT
+        value: "587"
+      - key: SMTP_USERNAME
+        sync: false
+      - key: SMTP_PASSWORD
+        sync: false
+      - key: SMTP_USE_TLS
+        value: "true"
+      - key: SMTP_USE_SSL
+        value: "false"
+      - key: BACKEND_CORS_ORIGINS
+        sync: false
+      - key: PROJECT_NAME
+        value: "Plateforme Tontine"
+      - key: API_V1_PREFIX
+        value: "/api/v1"
+
+  # ── Frontend React ───────────────────────────────────────────────────────────
+  - type: web
+    name: tontine-frontend
+    runtime: static
+    rootDir: frontend
+    buildCommand: npm install && npm run build
+    staticPublishPath: dist
+    envVars:
+      - key: VITE_API_URL
+        sync: false
+
+# ── PostgreSQL ───────────────────────────────────────────────────────────────
+databases:
+  - name: tontine-db
+    databaseName: tontine_app
+    user: tontine_user
+    plan: free
