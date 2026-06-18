@@ -1,8 +1,8 @@
-﻿name: Keep Render alive
+name: Keep Render alive
 
 on:
   schedule:
-    - cron: "*/10 * * * *"
+    - cron: "*/14 * * * *"
   workflow_dispatch:
 
 jobs:
@@ -11,10 +11,11 @@ jobs:
     steps:
       - name: Ping backend
         run: |
-          STATUS=$(curl -s -o /dev/null -w "%{http_code}" ${{ secrets.RENDER_BACKEND_URL }}/api/v1/health)
+          STATUS=$(curl -s -o /dev/null -w "%{http_code}" https://tontine-backend-vj2a.onrender.com/health)
           echo "Backend responded: $STATUS"
           if [ "$STATUS" -ge 200 ] && [ "$STATUS" -lt 400 ]; then
-            echo "OK"
+            echo "Backend is awake ✓"
           else
-            echo "Warning: got $STATUS"
+            echo "Warning: got HTTP $STATUS"
+            exit 1
           fi
