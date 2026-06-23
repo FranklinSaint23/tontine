@@ -25,6 +25,7 @@ import {
 } from 'lucide-react'
 import { api } from './api'
 import AuthScreen from './components/AuthScreen'
+import LandingPage from './components/LandingPage'
 import Field from './components/Field'
 import StatCard from './components/StatCard'
 import Sidebar from './components/layout/Sidebar'
@@ -1052,6 +1053,8 @@ function Main({ user }) {
 export default function App() {
   const [user, setUser] = useState(null)
   const [checkingAuth, setCheckingAuth] = useState(true)
+  // 'landing' | 'auth' | 'app'
+  const [screen, setScreen] = useState('landing')
 
   useEffect(() => {
     const check = async () => {
@@ -1063,6 +1066,7 @@ export default function App() {
       try {
         const me = await api.me()
         setUser(me)
+        setScreen('app')
       } catch (err) {
         localStorage.removeItem('tontine_token')
       } finally {
@@ -1076,6 +1080,7 @@ export default function App() {
     try {
       const me = await api.me()
       setUser(me)
+      setScreen('app')
     } catch (err) {
       console.error('login callback failed', err)
     }
@@ -1083,16 +1088,23 @@ export default function App() {
 
   if (checkingAuth) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-gray-50">
-        <div className="text-center">
-          <h2 className="text-2xl font-bold mb-4">Chargement...</h2>
-          <p className="text-gray-500">Vérification de l'authentification...</p>
+      <div className="flex min-h-screen items-center justify-center bg-blue-600">
+        <div className="text-center text-white">
+          <div className="w-12 h-12 rounded-2xl bg-white/20 flex items-center justify-center mx-auto mb-4">
+            <CircleDollarSign size={24} className="text-white" />
+          </div>
+          <p className="font-extrabold text-lg">TontineApp</p>
+          <p className="text-blue-200 text-sm mt-1">Chargement...</p>
         </div>
       </div>
     )
   }
 
-  if (!user) {
+  if (screen === 'landing' && !user) {
+    return <LandingPage onGetStarted={() => setScreen('auth')} />
+  }
+
+  if (screen === 'auth' && !user) {
     return <AuthScreen onLogin={handleLogin} />
   }
 
