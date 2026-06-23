@@ -66,6 +66,13 @@ button:disabled {
   font-weight: 700;
 }
 
+/* Mobile safe area for bottom nav (iPhone notch/home indicator) */
+@supports (padding-bottom: env(safe-area-inset-bottom)) {
+  nav.fixed.bottom-0 {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+}
+
 @media print {
   body, html {
     background: white !important;

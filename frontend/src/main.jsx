@@ -624,6 +624,7 @@ function Main({ user }) {
   const [notificationsLoading, setNotificationsLoading] = useState(true)
   const [notificationsOpen, setNotificationsOpen] = useState(false)
   const [statsLoading, setStatsLoading] = useState(true)
+  const [sidebarOpen, setSidebarOpen] = useState(false)
 
   // Effect hooks and helper functions would remain here but simplified
   // ... (keeping the core logic but moving UI components to separate files)
@@ -862,34 +863,74 @@ function Main({ user }) {
     }
   }
 
+  const BOTTOM_NAV = [
+    { id: 'dashboard', icon: LayoutDashboard, label: 'Accueil' },
+    { id: 'groups', icon: Users, label: 'Groupes' },
+    { id: 'cotisations', icon: Banknote, label: 'Cotis.' },
+    { id: 'emprunts', icon: Wallet, label: 'Emprunts' },
+    { id: 'settings', icon: Settings, label: 'Réglages' },
+  ]
+
   return (
     <div className="flex min-h-screen bg-[#f8fafc] text-ink">
-      {/* Sidebar */}
-      <Sidebar 
-        activeTab={activeTab} 
-        setActiveTab={setActiveTab} 
-        user={user} 
-        onLogout={onLogout} // Would need to define
-      />
+      {/* Mobile sidebar drawer overlay */}
+      {sidebarOpen && (
+        <div className="fixed inset-0 z-50 md:hidden">
+          <div
+            className="fixed inset-0 bg-black/50 backdrop-blur-sm"
+            onClick={() => setSidebarOpen(false)}
+          />
+          <div className="fixed inset-y-0 left-0 z-50 flex">
+            <Sidebar
+              activeTab={activeTab}
+              setActiveTab={setActiveTab}
+              user={user}
+              onLogout={onLogout}
+              onClose={() => setSidebarOpen(false)}
+            />
+          </div>
+        </div>
+      )}
+
+      {/* Desktop sidebar — hidden on mobile */}
+      <div className="hidden md:flex md:flex-shrink-0">
+        <Sidebar
+          activeTab={activeTab}
+          setActiveTab={setActiveTab}
+          user={user}
+          onLogout={onLogout}
+        />
+      </div>
 
       {/* Main Content */}
-      <main className="flex-1 flex flex-col h-screen overflow-y-auto">
-        <header className="flex items-center justify-between px-8 py-5 bg-white border-b border-black/5 shadow-sm shrink-0">
-          <div>
-            {selectedGroup && activeTab === 'groups' ? (
-              <div className="flex items-center gap-2">
-                <span className="text-xs font-black uppercase tracking-wider text-blue-600 bg-blue-50 px-2 py-0.5 rounded border border-blue-100">Groupe sélectionné</span>
-                <span className="text-sm font-extrabold text-slate-800">{selectedGroup.nom}</span>
-              </div>
-            ) : (
-              <p className="text-sm font-extrabold text-slate-800">Bonjour, {user.nom} 👋</p>
-            )}
+      <main className="flex-1 flex flex-col min-h-screen overflow-y-auto">
+        <header className="flex items-center justify-between px-4 md:px-8 py-4 md:py-5 bg-white border-b border-black/5 shadow-sm shrink-0">
+          <div className="flex items-center gap-3">
+            {/* Hamburger — mobile only */}
+            <button
+              className="md:hidden p-2 hover:bg-slate-100 rounded-lg transition-colors text-slate-600"
+              onClick={() => setSidebarOpen(true)}
+              aria-label="Menu"
+            >
+              <Menu size={20} />
+            </button>
+
+            <div>
+              {selectedGroup && activeTab === 'groups' ? (
+                <div className="flex items-center gap-2 flex-wrap">
+                  <span className="text-xs font-black uppercase tracking-wider text-blue-600 bg-blue-50 px-2 py-0.5 rounded border border-blue-100">Groupe sélectionné</span>
+                  <span className="text-sm font-extrabold text-slate-800 truncate max-w-[140px] sm:max-w-none">{selectedGroup.nom}</span>
+                </div>
+              ) : (
+                <p className="text-sm font-extrabold text-slate-800">Bonjour, {user.nom} 👋</p>
+              )}
+            </div>
           </div>
-          
-          <div className="flex items-center gap-4">
-            {/* Header actions */}
-            <button 
-              onClick={() => setNotificationsOpen(true)} 
+
+          <div className="flex items-center gap-2 md:gap-4">
+            {/* Notifications */}
+            <button
+              onClick={() => setNotificationsOpen(true)}
               className="relative p-2 hover:bg-slate-50 border border-slate-200/60 rounded-lg shadow-sm transition-colors text-slate-600 shrink-0"
               title="Notifications"
             >
@@ -899,8 +940,8 @@ function Main({ user }) {
               )}
             </button>
 
-            {/* Profile Pill in Header */}
-            <div className="flex items-center gap-2 bg-slate-50 border border-slate-200/60 px-3 py-1.5 rounded-lg shrink-0">
+            {/* Profile Pill */}
+            <div className="flex items-center gap-2 bg-slate-50 border border-slate-200/60 px-2 md:px-3 py-1.5 rounded-lg shrink-0">
               <div className="w-6 h-6 rounded-full bg-blue-600 text-white flex items-center justify-center font-black text-[10px]">
                 {user.nom.substring(0, 2).toUpperCase()}
               </div>
@@ -909,9 +950,33 @@ function Main({ user }) {
           </div>
         </header>
 
-        <div className="flex-1 p-6 overflow-y-auto">
+        {/* Content — extra bottom padding on mobile for bottom nav */}
+        <div className="flex-1 p-3 md:p-6 overflow-y-auto pb-20 md:pb-6">
           {renderTabContent()}
         </div>
+
+        {/* Mobile bottom navigation */}
+        <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 z-40 flex items-stretch">
+          {BOTTOM_NAV.map((item) => (
+            <button
+              key={item.id}
+              onClick={() => setActiveTab(item.id)}
+              className={`relative flex-1 flex flex-col items-center justify-center gap-0.5 py-2 px-1 transition-colors ${
+                activeTab === item.id
+                  ? 'text-blue-600'
+                  : 'text-slate-400 hover:text-slate-600'
+              }`}
+            >
+              <item.icon size={20} strokeWidth={activeTab === item.id ? 2.5 : 1.8} />
+              <span className={`text-[9px] font-bold uppercase tracking-wide ${activeTab === item.id ? 'text-blue-600' : 'text-slate-400'}`}>
+                {item.label}
+              </span>
+              {activeTab === item.id && (
+                <span className="absolute top-0 left-1/2 -translate-x-1/2 w-6 h-0.5 bg-blue-600 rounded-full" />
+              )}
+            </button>
+          ))}
+        </nav>
       </main>
 
       <AIFloatingChat groups={groups} />

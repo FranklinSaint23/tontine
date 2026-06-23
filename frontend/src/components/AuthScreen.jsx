@@ -56,7 +56,8 @@ export default function AuthScreen({ onLogin }) {
   return (
     <main className="min-h-screen bg-[#f7f3ec] text-ink">
       <section className="mx-auto grid min-h-screen max-w-6xl items-center gap-8 px-5 py-8 lg:grid-cols-[1fr_420px]">
-        <div className="max-w-xl">
+        {/* Marketing side — hidden on mobile, visible on large screens */}
+        <div className="hidden lg:block max-w-xl">
           <div className="mb-16 flex items-center gap-3">
             <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-palm text-white shadow-sm">
               <CircleDollarSign size={20} />
@@ -78,7 +79,8 @@ export default function AuthScreen({ onLogin }) {
           </div>
         </div>
 
-        <section className="rounded-xl border border-black/10 bg-white p-6 shadow-sm">
+        {/* Login/Register form — full width on mobile, right column on large screens */}
+        <section className="rounded-xl border border-black/10 bg-white p-6 shadow-sm w-full max-w-md mx-auto lg:max-w-none">
           <div className="mb-7 grid grid-cols-2 rounded-lg bg-[#f2efe9] p-1">
             <button
               className={`rounded-md px-3 py-2 text-sm font-semibold transition ${
